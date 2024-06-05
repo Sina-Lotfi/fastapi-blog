@@ -24,3 +24,16 @@ class UserOprations:
             if user_data is None:
                 raise ValidationErr('User non found')
             return user_data
+
+    async def update_username(self, old_username:str, new_username:str) -> User:
+        query = sa.select(User).where(User.username == old_username)
+        update_query = sa.update(User).where(User.username == old_username).values(username=new_username)
+        async with self.db_session as session:
+            user_data = await session.scalar(query)
+            if user_data is None:
+                raise ValidationErr('User non found')
+            await session.execute(update_query)
+            await session.commit()
+            user_data.username = new_username
+            return user_data
+
